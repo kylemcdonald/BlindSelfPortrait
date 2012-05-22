@@ -2,21 +2,14 @@
 
 #include "ofMain.h"
 
-struct bySecond {
-	template <class First, class Second>
-	bool operator()(std::pair<First, Second> const &a, std::pair<First, Second> const &b) { 
-		return a.second < b.second;
-	}
-};
-
 class City {
 public:
 	City(int x, int y)
-	: x(x)
-	, y(y)
-	, group(0)
-	, connected(false)
-	, neighbor(NULL) {
+	:x(x)
+	,y(y)
+	,group(0)
+	,connected(false)
+	,neighbor(NULL) {
 	}
 	float distance(City& city) const {
 		int dx = x - city.x, dy = y - city.y;
