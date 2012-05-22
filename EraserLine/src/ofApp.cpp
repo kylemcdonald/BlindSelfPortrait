@@ -44,7 +44,7 @@ void ofApp::setup() {
 	lastState = 0;
 	osc.setup(ip, port);
 	
-	img.loadImage("c.png");
+	img.loadImage("img.png");
 	img.setImageType(OF_IMAGE_GRAYSCALE);
 	ofxCv::threshold(img, 128); // screenshot was blurry
 	thin(img); // make lines don't have adjacent neighbors
@@ -112,7 +112,7 @@ void ofApp::setup() {
 	}
 	
 	target = target.getResampledBySpacing(1. / pointsPerPixel);
-	target = target.getSmoothed(8);
+	//target = target.getSmoothed(8);
 }
 
 void ofApp::update() {
