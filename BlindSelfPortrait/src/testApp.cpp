@@ -88,7 +88,7 @@ void testApp::setup() {
 	cameraBox = ofRectangle(0, 0, 1280, 720);
 	
 	tracker.setup();
-	tracker.setRescale(.5);
+	tracker.setRescale(.25);
 	
 	background.setLearningTime(backgroundAdapt);
 	background.setThresholdValue(10);
@@ -124,10 +124,16 @@ void testApp::update() {
 		//threshold(thresholded, 128);
 		//thresholded.update();
 		
+#ifdef MANUAL_OVERRIDE
+		moving = ofGetKeyPressed(OF_KEY_RETURN);
+#else
 		moving = false;
+#endif
 		if(tracker.getFound()) {
 			eyeOpenness = tracker.getGesture(ofxFaceTracker::LEFT_EYE_OPENNESS);
-			moving = ofGetKeyPressed(OF_KEY_RETURN);//(eyeOpenness < eyeThreshold) || 
+#ifndef MANUAL_OVERRIDE
+			moving = (eyeOpenness < eyeThreshold);
+#endif
 			
 			if(!moving) {
 				boundingBox = tracker.getImageFeature(ofxFaceTracker::FACE_OUTLINE).getBoundingBox();
@@ -170,6 +176,7 @@ void testApp::update() {
 	float state = progress * pointsPerSecond;
 	int curState = (int) state;
 	if(curState < target.size()) {
+		cleanedUp = false;
 		if(curState == 0 || lastState < curState) {
 			while(lastState < curState) {
 				ofVec2f cur = target[lastState];
@@ -182,9 +189,12 @@ void testApp::update() {
 				lastState++;
 			}
 		}
-	} else if(curState == target.size()) {
-		origin();
-		beep.play();
+	} else {
+		if(!cleanedUp) {
+			origin();
+			beep.play();
+			cleanedUp = true;
+		}
 	}
 }
 
@@ -264,18 +274,11 @@ void testApp::draw() {
 	square.draw(square.width * 0, 0);
 	//fg.draw(square.width * 1, 0);
 	edge.draw(square.width * 1, 0);
-	ofPushMatrix();
-	ofTranslate(square.width * 2, 0);
-	ofSetColor(0);
-	ofPushStyle();
-	ofFill();
-	ofRect(0, 0, square.width, square.height);
-	ofPopStyle();
+	
 	ofSetColor(ofColor::red);
 	target.draw();
 	ofSetColor(255);
 	drawn.draw();
-	ofPopMatrix();
 	
 	ofNoFill();
 	ofRect(boundingBox);

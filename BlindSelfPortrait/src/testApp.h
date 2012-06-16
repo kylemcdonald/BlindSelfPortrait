@@ -7,6 +7,8 @@
 #include "ofxPathfinder.h"
 #include "ofxOsc.h"
 
+#define MANUAL_OVERRIDE
+
 class testApp : public ofBaseApp {
 public:
 	void setup();
@@ -42,4 +44,5 @@ public:
 	float eyeOpenness;
 	
 	ofSoundPlayer beep;
+	bool cleanedUp;
 };
