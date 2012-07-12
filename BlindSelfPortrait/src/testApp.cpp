@@ -191,7 +191,7 @@ void testApp::update() {
 		}
 	} else {
 		if(!cleanedUp) {
-			origin();
+			//origin();
 			beep.play();
 			cleanedUp = true;
 		}
@@ -310,6 +310,12 @@ void testApp::keyPressed(int key) {
 		origin();
 	}
 }
+
+void testApp::keyReleased(int key) {
+	if(key == OF_KEY_RETURN) {
+		square.saveImage(ofToString(ofGetSystemTime()) + ".png");
+	}
+}	
 
 void testApp::origin() {
 	ofxOscMessage msg;
