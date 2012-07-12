@@ -18,34 +18,32 @@ void testApp::setup() {
 		original.push_back(curMat);
 	}
 	
-	lowPass.resize(n);
-	highPass.resize(n);
-	highPass8u.resize(n);
-	sobel.resize(n);
+	detailPass.resize(n);
+	maskPass.resize(n);
+	result.resize(n);
 }
 
 void testApp::update() {
-	float radius = 100;//MIN(200, mouseX);
-	float scaling = 2;//MIN(100, mouseY);
-	int sobelRadius = -1; // scharr
-	float sobelScale = .1;
+	float detailSigma = .5;
+	float detailScaling = 25 / detailSigma;
+	float detailThreshold = 128;
+	float maskSigma = 6.;//ofClamp(mouseX / 10., .1, 100);
+	float maskScaling = 25 / maskSigma;
+	float maskThreshold = 110.;//mouseX;
 	for(int i = 0; i < original.size(); i++) {
-		ofxCv::blur(original[i], lowPass[i], radius);
-		highPass[i] = original[i] - lowPass[i];
+		cv::GaussianBlur(original[i], lowPass, cv::Size(), detailSigma, detailSigma);
+		highPass = original[i] - lowPass;
+		highPass.convertTo(highPass8uc3, CV_8UC3, detailScaling * 128, 128);
+		convertColor(highPass8uc3, detailPass[i], CV_RGB2GRAY);
+		threshold(detailPass[i], detailThreshold);
 		
-		cv::Sobel(highPass[i], sobelX, CV_32F, 1, 0, sobelRadius, sobelScale, .5);
-		cv::Sobel(highPass[i], sobelY, CV_32F, 0, 1, sobelRadius, sobelScale, .5);
-		convertColor(sobelX, sobelXMag, CV_RGB2GRAY);
-		convertColor(sobelY, sobelYMag, CV_RGB2GRAY);
-		imitate(sobelDummy, sobelXMag);
-		sobelDummy.setTo(cv::Scalar(.5));
-		vector<Mat> sobelChannels;
-		sobelChannels.push_back(sobelXMag);
-		sobelChannels.push_back(sobelYMag);
-		sobelChannels.push_back(sobelDummy);
-		cv::merge(sobelChannels, sobel[i]);
+		cv::GaussianBlur(original[i], lowPass, cv::Size(), maskSigma, maskSigma);
+		highPass = original[i] - lowPass;
+		highPass.convertTo(highPass8uc3, CV_8UC3, maskScaling * 128, 128);
+		convertColor(highPass8uc3, maskPass[i], CV_RGB2GRAY);
+		threshold(maskPass[i], maskThreshold);
 		
-		highPass[i].convertTo(highPass8u[i], CV_8UC3, scaling * 128, 128);
+		result[i] = maskPass[i] | detailPass[i];
 	}
 }
 
@@ -57,15 +55,19 @@ void testApp::draw() {
 		drawMat(original[i], 0, 0); ofTranslate(0, side);
 		//drawMat(lowPass[i], 0, 0); ofTranslate(0, side);
 		//drawMat(highPass[i], 0, 0); ofTranslate(0, side);
-		drawMat(highPass8u[i], 0, 0); if(!ofGetKeyPressed()) ofTranslate(0, side);
-		drawMat(sobel[i], 0, 0); ofTranslate(0, side);
+		//drawMat(highPass8uc3[i], 0, 0); ofTranslate(0, side);
+		drawMat(detailPass[i], 0, 0); ofTranslate(0, side);
+		drawMat(maskPass[i], 0, 0); ofTranslate(0, side);
+		drawMat(result[i], 0, 0); ofTranslate(0, side);
 		ofPopMatrix();
 		ofTranslate(side, 0);
 		
 		if(ofGetKeyPressed()) {
 			ofImage img;
-			copy(sobel[i], img);
-			img.saveImage("sobel-" + ofToString(i) + ".png");
+			copy(result[i], img);
+			img.saveImage("result-" + ofToString(i) + ".png");
 		}
 	}
+	
+	ofDrawBitmapStringHighlight(ofToString(mouseX) + "," + ofToString(mouseY), 10, 20);
 }

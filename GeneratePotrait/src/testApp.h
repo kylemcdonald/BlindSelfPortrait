@@ -10,6 +10,8 @@ public:
 	void update();
 	void draw();
 	
-	vector<cv::Mat> original, lowPass, highPass, highPass8u, sobel;
-	cv::Mat sobelX, sobelY, sobelXMag, sobelYMag, sobelDummy;
+	vector<cv::Mat> original;
+	vector<cv::Mat> detailPass, maskPass, result;
+	
+	cv::Mat lowPass, highPass, highPass8uc3;
 };
