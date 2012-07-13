@@ -4,6 +4,24 @@ using namespace ofxCv;
 
 int side = 256;
 
+cv::Point findCenter(Mat mat, unsigned char target) {
+	int crow = mat.rows / 2, ccol = mat.cols / 2;
+	cv::Point bestPoint;
+	float bestDistance = numeric_limits<float>::infinity();
+	for(int row = 0; row < mat.rows; row++) {
+		for(int col = 0; col < mat.cols; col++) {
+			if(mat.at<unsigned char>(row, col) == target) {
+				float distance = ofDist(crow, ccol, row, col);
+				if(distance < bestDistance) {
+					bestPoint = cv::Point(col, row);
+					bestDistance = distance;
+				}
+			}
+		}
+	}
+	return bestPoint;
+}
+
 void testApp::setup() {
 	ofSetVerticalSync(true);
 	
@@ -21,15 +39,16 @@ void testApp::setup() {
 	detailPass.resize(n);
 	maskPass.resize(n);
 	result.resize(n);
+	centers.resize(n);
 }
 
 void testApp::update() {
 	float detailSigma = .5;
 	float detailScaling = 25 / detailSigma;
-	float detailThreshold = 128;
-	float maskSigma = 6.;//ofClamp(mouseX / 10., .1, 100);
+	float detailThreshold = 120;
+	float maskSigma = 4;//ofClamp(mouseX / 10., .1, 100);
 	float maskScaling = 25 / maskSigma;
-	float maskThreshold = 110.;//mouseX;
+	float maskThreshold = 105;//mouseY;
 	for(int i = 0; i < original.size(); i++) {
 		cv::GaussianBlur(original[i], lowPass, cv::Size(), detailSigma, detailSigma);
 		highPass = original[i] - lowPass;
@@ -44,6 +63,7 @@ void testApp::update() {
 		threshold(maskPass[i], maskThreshold);
 		
 		result[i] = maskPass[i] | detailPass[i];
+		centers[i] = findCenter(result[i], 0);
 	}
 }
 
@@ -52,13 +72,14 @@ void testApp::draw() {
 	
 	for(int i = 0; i < original.size(); i++) {
 		ofPushMatrix();
+		ofSetColor(255);
 		drawMat(original[i], 0, 0); ofTranslate(0, side);
-		//drawMat(lowPass[i], 0, 0); ofTranslate(0, side);
-		//drawMat(highPass[i], 0, 0); ofTranslate(0, side);
-		//drawMat(highPass8uc3[i], 0, 0); ofTranslate(0, side);
 		drawMat(detailPass[i], 0, 0); ofTranslate(0, side);
 		drawMat(maskPass[i], 0, 0); ofTranslate(0, side);
-		drawMat(result[i], 0, 0); ofTranslate(0, side);
+		drawMat(result[i], 0, 0);
+		ofSetColor(ofColor::red);
+		ofNoFill();
+		ofCircle(toOf(centers[i]), 6);
 		ofPopMatrix();
 		ofTranslate(side, 0);
 		
