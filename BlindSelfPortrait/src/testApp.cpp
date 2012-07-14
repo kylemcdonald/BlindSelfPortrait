@@ -159,7 +159,7 @@ void testApp::update() {
 				//bitwise_and(edge, fg, edge);
 				thin(edge);
 				removeIslands(edge.getPixelsRef());
-				lighten(edge.getPixelsRef(), 5);
+				lighten(edge.getPixelsRef(), 1);
 				edge.update();
 			}
 		}
@@ -246,7 +246,7 @@ void testApp::updatePath() {
 		}
 		intPair& next = *nearIt;
 		x = next.first, y = next.second;
-		pathfinder.find(x, y, lastx, lasty);
+		pathfinder.find(lastx, lasty, x, y);
 		ofPolyline& path = pathfinder.path;
 		for(int j = 0; j < path.size(); j++) {
 			x = path[j].x, y = path[j].y;
