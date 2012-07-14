@@ -159,7 +159,7 @@ void testApp::update() {
 		}
 		*/
 		
-		
+		/*
 		// mark the path you've seen, pick at random
 		remaining[i] = terrain.clone();
 		cv::Point cur = findCenter(terrain, 255), next;
@@ -183,7 +183,7 @@ void testApp::update() {
 		}
 		invert(remaining[i]);
 		threshold(remaining[i], 128);
-		
+		*/
 	}
 }
 
@@ -194,7 +194,7 @@ void testApp::draw() {
 		ofPushMatrix();
 		ofSetColor(255);
 		drawMat(original[i], 0, 0); ofTranslate(0, side);
-		//drawMat(detailPass[i], 0, 0); ofTranslate(0, side);
+		drawMat(detailPass[i], 0, 0); ofTranslate(0, side);
 		drawMat(maskPass[i], 0, 0); ofTranslate(0, side);
 		//drawMat(remaining[i], 0, 0); ofTranslate(0, side);
 		drawMat(result[i], 0, 0); ofTranslate(0, side);
