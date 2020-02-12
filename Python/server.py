@@ -28,10 +28,7 @@ POST a JSON of form
     imgdata: <image dataURL>
 }
 RETURNS:
-a JSON of form
-{
-    coords: [N x 2 array of coordinates in range 0-255]
-}
+a GeoJSON LineString geometry
 
 </pre>
 <script  type="text/javascript">
