@@ -435,5 +435,5 @@ def rgb2line(img):
     rgb = np.asarray(img)
     gray = cv2.cvtColor(rgb, cv2.COLOR_RGB2GRAY)
     line = pipeline(gray)
-    return { 'coords': np.asarray(line).tolist() }
+    return line.__geo_interface__
 
