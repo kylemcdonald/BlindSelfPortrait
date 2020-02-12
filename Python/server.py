@@ -19,13 +19,14 @@ def index():
 <body>
 <video autoplay="true" id="webcam"></video>
 <div id="status">press spacebar to process</div>
+<canvas id="result" width="256" height="256"></canvas>
 <pre>
 API:
 
 http://<this ip>:8989/canny_cld_astar
 POST a JSON of form
 {
-    imgdata: <image dataURL>
+    imgdata: base64 dataurl
 }
 RETURNS:
 a GeoJSON LineString geometry
@@ -36,7 +37,7 @@ a GeoJSON LineString geometry
 async function main() {
     const video = document.querySelector("#webcam")
     const status = document.querySelector('#status')
-
+    const output = document.querySelector('#result')
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true })
         video.srcObject = stream
@@ -45,7 +46,7 @@ async function main() {
     }
 
     const canvas = document.createElement('canvas')
-    
+    document.body.appendChild(canvas)
     await new Promise((res, rej) => {
         const interval = setInterval(() => {
             if(video.videoWidth != 0) {
@@ -59,15 +60,16 @@ async function main() {
     canvas.height = 256
 
     const ctx = canvas.getContext('2d')
-    
+    const outputCtx = output.getContext('2d')
+    let lastOutput = undefined
     const process = async () => {
         console.log('processing...')
         const vw = video.videoWidth
         const vh = video.videoHeight
-        const f = 256 / vh
-        const vwScaled = f * vw
-        const offset = vwScaled - 256
-        ctx.drawImage(video, -offset/2, 0, 256, 256)
+        const aspect = vw/vh
+        const offset = (aspect - 1.0) * vw
+        ctx.drawImage(video, -offset/4, 0, 256 + offset/2, 256)
+        
         const imgdata = canvas.toDataURL()
         status.innerText = 'uploading...'
         const config = {
@@ -82,9 +84,20 @@ async function main() {
         const response = await fetch('http://localhost:8989/canny_cld_astar', config)
         status.innerText = 'got response'
         const json = await response.json()
-        console.log(json)
+        const coords = json['coordinates']
+        
+        outputCtx.clearRect(0, 0, 256, 256)
+        outputCtx.beginPath()
+        outputCtx.moveTo(Math.floor(coords[0][0]), Math.floor(255 - coords[0][1]))
+        for(const coord of coords) {
+            outputCtx.lineTo(Math.floor(coord[0]), Math.floor(255 - coord[1]))
+        }
+        outputCtx.stroke()
+
         status.innerText = 'done. see console for return value'
     }
+
+
 
     document.addEventListener("keydown", e => {
         if(e.code == 'Space') process()
@@ -114,7 +127,6 @@ def do_upload():
     except Exception as e:
         print(e)
         return ""
-
     ret = process_cld.rgb2line(img)
     response.content_type = 'application/json'
     return ujson.dumps(ret)

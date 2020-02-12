@@ -38,7 +38,11 @@ def histogram_equalize(data, max_val=None, endpoint=False):
 def _cld(gray, halfw = 8,smoothPasses = 4, sigma1 = .9, sigma2 = 3, tau = .97):
     name = 'cld_tmp_'
     cv2.imwrite(f'{name}_in.bmp', gray)
-    subprocess.check_call(f'wsl ./cld {name}_in.bmp {name}_out.bmp {halfw} {smoothPasses} {sigma1} {sigma2} {tau}')
+    if os.name == 'nt':
+        wsl = 'wsl'
+    else:
+        wsl = ''
+    subprocess.check_call(f'{wsl} ./cld {name}_in.bmp {name}_out.bmp {halfw} {smoothPasses} {sigma1} {sigma2} {tau}')
     return cv2.imread(f'{name}_out.bmp', cv2.IMREAD_GRAYSCALE)
 
 def raster_edges(gray, histogram_eq=False, cld=True, canny_low=100, canny_hi=200):
@@ -406,11 +410,14 @@ def pipeline(gray):
     edges = raster_edges(gray)
     edges[:, 240:] = 255
     edges[:, :16] = 255
-    edges[:16, :] = 255
-    edges[240:]
+    edges[:4, :] = 255
+    edges[252:, :] = 255
 
     cv2.imwrite('trace_in.bmp', edges)
-    subprocess.check_call(r'.\potrace-1.16.win64\potrace.exe trace_in.bmp -o trace_out.geojson -b geojson')
+    if os.name == 'nt':
+        subprocess.check_call(r'.\potrace-1.16.win64\potrace.exe trace_in.bmp -o trace_out.geojson -b geojson')
+    else:
+        subprocess.check_call(r'./potrace-1.16.linux-x86_64/potrace trace_in.bmp -o trace_out.geojson -b geojson')
 
     with open('trace_out.geojson') as fp:
         geojson = json.load(fp)
