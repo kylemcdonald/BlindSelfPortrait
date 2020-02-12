@@ -188,9 +188,14 @@ import scipy.spatial
 
 def triangulate(sampled_grad_pixels):
     nonzero_ys, nonzero_xs = np.nonzero(sampled_grad_pixels)
-    nonzero_coords = np.dstack((255 - nonzero_ys, nonzero_xs)).squeeze().astype(np.float32)
+    nonzero_coords = np.dstack((nonzero_ys, nonzero_xs)).squeeze().astype(np.float32)
     tri = scipy.spatial.Delaunay(nonzero_coords)
-    return tri
+
+    z = np.zeros_like(sampled_grad_pixels)
+    p = tri.points.astype(np.int)
+    vals = np.nonzero(sampled_grad_pixels)
+    z[p[:, 0], p[:, 1]] = sampled_grad_pixels[vals[0], vals[1]]
+    return tri, z
 
 
 # Cell
@@ -401,6 +406,8 @@ def pipeline(gray):
     edges = raster_edges(gray)
     edges[:, 240:] = 255
     edges[:, :16] = 255
+    edges[:16, :] = 255
+    edges[240:]
 
     cv2.imwrite('trace_in.bmp', edges)
     subprocess.check_call(r'.\potrace-1.16.win64\potrace.exe trace_in.bmp -o trace_out.geojson -b geojson')
@@ -423,7 +430,7 @@ def pipeline(gray):
 
     grad_samples = sample_grad(grad_blurred)
 
-    tri = triangulate(grad_samples)
+    tri, grad_samples = triangulate(grad_samples)
 
     graph = to_graph(tri)
 
