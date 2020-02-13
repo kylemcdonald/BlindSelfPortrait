@@ -83,18 +83,24 @@ async function main() {
 
         const response = await fetch(`http://${window.location.host}/canny_cld_astar`, config)
         status.innerText = 'got response'
-        const json = await response.json()
-        const coords = json['coordinates']
-        
-        outputCtx.clearRect(0, 0, 256, 256)
-        outputCtx.beginPath()
-        outputCtx.moveTo(Math.floor(coords[0][0]), Math.floor(255 - coords[0][1]))
-        for(const coord of coords) {
-            outputCtx.lineTo(Math.floor(coord[0]), Math.floor(255 - coord[1]))
-        }
-        outputCtx.stroke()
+        try {
+            const json = await response.json()
+            const coords = json['coordinates']
+            
+            outputCtx.clearRect(0, 0, 256, 256)
+            outputCtx.beginPath()
+            outputCtx.moveTo(Math.floor(coords[0][0]), Math.floor(255 - coords[0][1]))
+            for(const coord of coords) {
+                outputCtx.lineTo(Math.floor(coord[0]), Math.floor(255 - coord[1]))
+            }
+            outputCtx.stroke()
 
-        status.innerText = 'done. see console for return value'
+            status.innerText = 'done. see console for return value'
+        } catch (err) {
+            const txt = await response.text()
+            console.error(err, txt)
+            status.innerText = `error: ${txt}, ${err}, see consode for more details`
+        }
     }
 
 
