@@ -320,7 +320,7 @@ def mk_heuristic_fn(tri, grad_blurred):
         dist = distance(i, goal)
         coords = tri.points[i].astype(np.int)
         edginess = grad_blurred[255 - coords[1], coords[0]]
-        return dist
+        return dist + (1.0 - edginess) * 10
     return heuristic
 
 def mk_weight_fn(tri, grad_blurred):
