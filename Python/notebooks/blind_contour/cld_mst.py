@@ -192,13 +192,13 @@ import scipy.spatial
 
 def triangulate(sampled_grad_pixels):
     nonzero_ys, nonzero_xs = np.nonzero(sampled_grad_pixels)
-    nonzero_coords = np.dstack((nonzero_ys, nonzero_xs)).squeeze().astype(np.float32)
+    nonzero_coords = np.dstack((nonzero_xs, 255 - nonzero_ys)).squeeze().astype(np.float32)
     tri = scipy.spatial.Delaunay(nonzero_coords)
 
     z = np.zeros_like(sampled_grad_pixels)
     p = tri.points.astype(np.int)
     vals = np.nonzero(sampled_grad_pixels)
-    z[p[:, 0], p[:, 1]] = sampled_grad_pixels[vals[0], vals[1]]
+    z[p[:, 1], p[:, 0]] = sampled_grad_pixels[vals[0], vals[1]]
     return tri, z
 
 
@@ -319,7 +319,7 @@ def mk_heuristic_fn(tri, grad_blurred):
     def heuristic(i, goal):
         dist = distance(i, goal)
         coords = tri.points[i].astype(np.int)
-        edginess = grad_blurred[coords[1], coords[0]]
+        edginess = grad_blurred[255 - coords[1], coords[0]]
         return dist
     return heuristic
 
@@ -340,7 +340,9 @@ def mk_weight_fn(tri, grad_blurred):
         mid = (i_pos + j_pos).astype(np.int) // 2
         i_pos = i_pos.astype(np.int)
         j_pos = j_pos.astype(np.int)
-        edginess = (grad_blurred[mid[1], mid[0]] + grad_blurred[i_pos[1], i_pos[0]] + grad_blurred[j_pos[1], j_pos[0]])/3.0
+        edginess = (grad_blurred[255 - mid[1], mid[0]] +
+                    grad_blurred[255 - i_pos[1], i_pos[0]] +
+                    grad_blurred[255 - j_pos[1], j_pos[0]])/3.0
         return dist + (1.0 - edginess)*10
     return weight
 
