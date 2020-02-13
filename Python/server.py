@@ -81,7 +81,7 @@ async function main() {
             body: JSON.stringify({ imgdata })
         }
 
-        const response = await fetch('http://localhost:8989/canny_cld_astar', config)
+        const response = await fetch(`http://${window.location.host}/canny_cld_astar`, config)
         status.innerText = 'got response'
         const json = await response.json()
         const coords = json['coordinates']
@@ -131,4 +131,4 @@ def do_upload():
     response.content_type = 'application/json'
     return ujson.dumps(ret)
 
-run(host='localhost', port=8989)
+run(host='0.0.0.0', port=8989)
