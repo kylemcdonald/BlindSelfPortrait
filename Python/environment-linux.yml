@@ -165,5 +165,7 @@ dependencies:
     - pillow==7.0.0
     - tqdm==4.42.1
     - ujson==1.35
+    - pcst-fast==1.0.7
+
 prefix: /home/aman26/miniconda3/envs/contour
 

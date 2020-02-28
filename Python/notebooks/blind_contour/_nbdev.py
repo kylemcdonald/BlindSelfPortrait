@@ -2,8 +2,8 @@
 
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
-index = {"histogram_equalize": "cld edges version-mst.ipynb",
-         "raster_edges": "cld edges version-mst.ipynb",
+index = {"histogram_equalize": "edge extraction.ipynb",
+         "raster_edges": "edge extraction.ipynb",
          "extract_centerlines": "cld edges version-mst.ipynb",
          "explode_multilines": "cld edges version-mst.ipynb",
          "merge_naive": "cld edges version-mst.ipynb",
@@ -11,7 +11,7 @@ index = {"histogram_equalize": "cld edges version-mst.ipynb",
          "reorder_center_dist": "cld edges version-mst.ipynb",
          "reorder_start_dist": "cld edges version-mst.ipynb",
          "reorder_end_dist": "cld edges version-mst.ipynb",
-         "sobel": "cld edges version-mst.ipynb",
+         "sobel": "grad graph.ipynb",
          "sample_grad": "cld edges version-mst.ipynb",
          "triangulate": "cld edges version-mst.ipynb",
          "to_graph": "cld edges version-mst.ipynb",
@@ -25,9 +25,20 @@ index = {"histogram_equalize": "cld edges version-mst.ipynb",
          "tuple_sq_dist": "cld edges version-mst.ipynb",
          "insert_a_star_connections": "cld edges version-mst.ipynb",
          "pipeline": "cld edges version-mst.ipynb",
-         "rgb2line": "cld edges version-mst.ipynb"}
+         "rgb2line": "cld edges version-mst.ipynb",
+         "nearest_vertex": "cld edges version-mst.ipynb",
+         "image_to_lines": "cld edges version-mst.ipynb",
+         "traverse": "cld edges version-mst.ipynb",
+         "LineTooShort": "cld edges version-mst.ipynb",
+         "traverse_nested": "cld edges version-mst.ipynb",
+         "rgb2line_steiner": "cld edges version-mst.ipynb",
+         "pipeline_steiner": "cld edges version-mst.ipynb",
+         "sobel_1d": "grad graph.ipynb"}
 
-modules = ["cld_mst.py"]
+modules = ["cld_mst_.py",
+           "cld_mst.py",
+           "edges.py",
+           "grad.py"]
 
 doc_url = "https://aman.github.io/blind_contour/"
 
