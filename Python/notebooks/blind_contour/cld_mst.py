@@ -9,6 +9,8 @@ __all__ = ['extract_centerlines', 'explode_multilines', 'merge_naive', 'greedy_r
 
 # Cell
 
+%load_ext autoreload
+%autoreload 2
 import os
 import json
 import glob
@@ -432,12 +434,15 @@ def nearest_vertex(tri, pt):
     return nearest_smplx_corner_to_curr
 
 # Cell
-
+import time
 import pcst_fast
 
 def image_to_lines(gray):
+    t0 = time.time()
 
     edges = raster_edges(gray)
+    print('cld:', time.time() - t0)
+
     edges[:, 240:] = 255
     edges[:, :16] = 255
     edges[240:, :] = 255
@@ -453,13 +458,20 @@ def image_to_lines(gray):
 
     shapes = [geom.shape(feature["geometry"]) for feature in geojson['features']]
 
-    center_geom_lines = extract_centerlines(shapes)
+#     center_geom_lines = extract_centerlines(shapes)
 
-    center_geom_lines = explode_multilines(center_geom_lines)
+#     center_geom_lines = explode_multilines(center_geom_lines)
+
+#     center_geom_lines = [line for line in center_geom_lines
+#                          if max(line.length, geom.Point(line.coords[0]).distance(geom.Point(line.coords[-1]))) > 4]
+    t1 = time.time()
+#     center_geom_lines = extract_centerlines_sknw(edges)
+
+    center_geom_lines = extract_centerlines__shapes_sknw(shapes)
 
     center_geom_lines = [line for line in center_geom_lines
-                         if max(line.length, geom.Point(line.coords[0]).distance(geom.Point(line.coords[-1]))) > 4]
-
+                     if max(line.length, geom.Point(line.coords[0]).distance(geom.Point(line.coords[-1]))) > 4]
+    print('edge extraction', time.time() - t1)
     return center_geom_lines
 
 
@@ -591,14 +603,17 @@ def pipeline_steiner(gray):
     tri_mat[ends, starts] = 0.00001234 #
     flat_edges_i, flat_edges_j = tri_mat.nonzero()
     flat_edges = np.dstack((flat_edges_i, flat_edges_j)).squeeze().astype(np.int64)
+
     prizes = np.zeros(shape=(tri_mat.shape[0],), dtype=np.float64)
+
     prizes[starts] = 100
     prizes[ends] = 100
+
     costs = np.asarray(tri_mat[flat_edges_i, flat_edges_j].squeeze()).squeeze()
     flat_edges.shape, prizes.shape
-
+    t1 = time.time()
     v, es = pcst_fast.pcst_fast(flat_edges, prizes, costs, -1, 1, 'gw', 1)
-
+    print('pcst:', time.time() - t1)
     lines = center_geom_lines[:]
 
     graph = defaultdict(list)
